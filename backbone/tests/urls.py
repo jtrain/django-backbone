@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.conf.urls import url, include
+from django.conf.urls import url
 from django.contrib import admin
 
 import backbone
@@ -11,7 +11,7 @@ backbone.autodiscover()
 from backbone.tests.views import homepage
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^backbone/', include(backbone.site.urls)),
+    url(r'^admin/', admin.site.urls),
+    url(r'^backbone/', backbone.site.urls),
     url(r'^$', homepage, name='tests-homepage'),
 ]

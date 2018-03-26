@@ -21,7 +21,9 @@ class Category(models.Model):
 class Product(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
-    brand = models.ForeignKey(Brand, null=True, blank=True)
+    brand = models.ForeignKey(
+        Brand, null=True, blank=True, on_delete=models.CASCADE
+    )
     categories = models.ManyToManyField(Category, blank=True)
     is_hidden = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=8, decimal_places=2)

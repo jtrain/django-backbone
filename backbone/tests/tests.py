@@ -5,8 +5,8 @@ from decimal import Decimal
 import json
 
 from django.contrib.auth.models import User, Permission
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 from django.utils.translation import ugettext as _
 
 from backbone.tests.models import Product, Brand, Category, ExtendedProduct, DisplayFieldsProduct
@@ -113,7 +113,7 @@ class CollectionTests(TestHelper):
         cat1 = self.create_category()
         cat2 = self.create_category()
         p = self.create_product()
-        p.categories = [cat1, cat2]
+        p.categories.set([cat1, cat2])
         url = reverse('backbone:tests_product')
         response = self.client.get(url)
         data = self.parseJsonResponse(response)
@@ -166,14 +166,14 @@ class CollectionTests(TestHelper):
 
         response = self.client.get(url, {'page': 2})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, _('Invalid `page` parameter: Out of range.'))
+        self.assertEqual(response.content, b'Invalid `page` parameter: Out of range.')
 
     def test_collection_view_page_parameter_not_an_integer_returns_error(self):
         url = reverse('backbone:tests_brand')
 
         response = self.client.get(url, {'page': 'abcd'})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, _('Invalid `page` parameter: Not a valid integer.'))
+        self.assertEqual(response.content, b'Invalid `page` parameter: Not a valid integer.')
 
     def test_collection_view_that_is_not_paginated_ignores_page_parameter(self):
         url = reverse('backbone:tests_product')
@@ -309,7 +309,7 @@ class AddTests(TestHelper):
         self.client.login(username='test', password='test')
         add_product = Permission.objects.get_by_natural_key('add_product', 'tests', 'product')
         add_brand = Permission.objects.get_by_natural_key('add_brand', 'tests', 'brand')
-        self.user.user_permissions = [add_product, add_brand]
+        self.user.user_permissions.set([add_product, add_brand])
 
     def test_post_request_on_product_collection_view_adds_product_to_db(self):
         brand = self.create_brand()
@@ -352,7 +352,7 @@ class AddTests(TestHelper):
         url = reverse('backbone:tests_product')
         response = self.client.post(url, 'Some invalid json', content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, _('Unable to parse JSON request body.'))
+        self.assertEqual(response.content, b'Unable to parse JSON request body.')
 
     def test_post_request_on_product_collection_view_with_validation_errors_returns_error_list_as_json(self):
         data = json.dumps({
@@ -396,7 +396,7 @@ class AddTests(TestHelper):
         url = reverse('backbone:tests_product')
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
         self.assertEqual(Product.objects.count(), 0)
 
     def test_post_request_on_product_collection_view_when_user_doesnt_have_add_permission_returns_403(self):
@@ -406,7 +406,7 @@ class AddTests(TestHelper):
         url = reverse('backbone:tests_product')
         response = self.client.post(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
 
     def test_post_request_on_product_collection_view_violating_field_specific_permission_returns_403(self):
         brand = self.create_brand()
@@ -421,7 +421,7 @@ class AddTests(TestHelper):
         url = reverse('backbone:tests_product')
         response = self.client.post(url, data, content_type='application/json')
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
 
     def test_post_request_on_brand_collection_view_uses_custom_model_form(self):
         data = json.dumps({
@@ -455,7 +455,7 @@ class UpdateTests(TestHelper):
         self.client.login(username='test', password='test')
         update_product = Permission.objects.get_by_natural_key('change_product', 'tests', 'product')
         update_brand = Permission.objects.get_by_natural_key('change_brand', 'tests', 'brand')
-        self.user.user_permissions = [update_product, update_brand]
+        self.user.user_permissions.set([update_product, update_brand])
 
     def test_put_request_on_product_detail_view_updates_product(self):
         product = self.create_product()
@@ -496,11 +496,11 @@ class UpdateTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.put(url, '', content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, _('Unable to parse JSON request body.'))
+        self.assertEqual(response.content, b'Unable to parse JSON request body.')
 
         response = self.client.put(url, 'Some invalid json', content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, _('Unable to parse JSON request body.'))
+        self.assertEqual(response.content, b'Unable to parse JSON request body.')
 
     def test_put_request_on_product_detail_view_with_validation_errors_returns_error_list_as_json(self):
         product = self.create_product()
@@ -544,7 +544,7 @@ class UpdateTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.put(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
 
     def test_put_request_on_product_detail_view_when_user_doesnt_have_update_permission_returns_403(self):
         product = self.create_product()
@@ -555,7 +555,7 @@ class UpdateTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.put(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
 
     def test_put_request_on_product_detail_view_violating_field_specific_permission_returns_403(self):
         product = self.create_product()
@@ -571,7 +571,7 @@ class UpdateTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.put(url, data, content_type='application/json')
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
 
     def test_put_request_on_brand_collection_view_uses_custom_model_form(self):
         brand = self.create_brand()
@@ -583,7 +583,7 @@ class UpdateTests(TestHelper):
         self.assertEqual(Product.objects.count(), 0)
         data = self.parseJsonResponse(response, status_code=400)
         self.assertEqual(len(data), 1)
-        self.assertEqual(data['name'], [_('Brand name must start with a capital letter.')])
+        self.assertEqual(data['name'], [('Brand name must start with a capital letter.')])
 
 
 class DeleteTests(TestHelper):
@@ -608,7 +608,7 @@ class DeleteTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
         self.assertEqual(Product.objects.count(), 1)
 
     def test_delete_request_on_product_when_user_doesnt_have_delete_permission_returns_403(self):
@@ -619,7 +619,7 @@ class DeleteTests(TestHelper):
         url = reverse('backbone:tests_product_detail', args=[product.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
         self.assertEqual(Product.objects.count(), 1)
 
     def test_delete_request_on_brand_returns_403(self):
@@ -627,7 +627,7 @@ class DeleteTests(TestHelper):
         url = reverse('backbone:tests_brand_detail', args=[brand.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.content, _('You do not have permission to perform this action.'))
+        self.assertEqual(response.content, b'You do not have permission to perform this action.')
         self.assertEqual(Brand.objects.count(), 1)
 
 

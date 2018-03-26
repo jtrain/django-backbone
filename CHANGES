@@ -1,3 +1,8 @@
+0.4.0
+
+* Adds support for Django 2.0
+* Removes support for Django 1.X
+
 0.3.2
 -----
 
